@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Meteors } from "@/components/ui/meteors";
-import { BackgroundBeamsWithCollision } from "@/components/ui/bg-beam-with-collision";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalTrigger } from "@/components/ui/animated-modal";
 import { motion } from "motion/react";
 import { useEffect } from "react";

@@ -8,7 +8,6 @@ import { motion } from "motion/react";
 import { ImagesSlider } from "@/components/ui/images-slider";
 import beachView from "../../../public/beach_view.jpg"
 import mountainScenery from "../../../public/mountain_scenery.jpg"
-import { BackgroundBeamsWithCollision } from "@/components/ui/bg-beam-with-collision";
 import { Typewriter } from "react-simple-typewriter";
 // import { FlipWords } from "@/components/ui/flip-word";
 

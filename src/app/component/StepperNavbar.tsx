@@ -2,7 +2,7 @@
 
 export default function StepperNavbar({ steps, currentStep }: { steps: string[], currentStep: number }) {
   return (
-    <div className="relative w-full mb-8 sm:mb-10">
+    <div className="relative w-full mb-8 sm:mb-10 max-w-full mx-8">
       {/* Background line */}
       <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-300 z-0" />
 
@@ -10,7 +10,11 @@ export default function StepperNavbar({ steps, currentStep }: { steps: string[],
       <div
         className="absolute top-4 left-0 h-0.5 bg-emerald-600 z-10 transition-all duration-300"
         style={{
-          width: `calc((100% / ${steps.length - 1}) * ${currentStep})`,
+          width: currentStep === 0 
+            ? '0%' 
+            : currentStep === steps.length - 1 
+            ? '100%' 
+            : `calc((100% / ${steps.length - 1}) * ${currentStep})`,
         }}
       />
 
@@ -33,7 +37,7 @@ export default function StepperNavbar({ steps, currentStep }: { steps: string[],
               >
                 {index + 1}
               </div>
-              <span className="text-[0.5rem] sm:text-sm font-medium mt-1 sm:mt-2">{step}</span>
+              <span className="text-[0.5rem] sm:text-sm font-medium mt-1 sm:mt-2 text-center">{step}</span>
             </div>
           );
         })}

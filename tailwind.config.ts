@@ -5,10 +5,24 @@ const config: Config = {
     content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/component/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
   	extend: {
+		animation: {
+			"meteor-effect": "meteor 5s linear infinite",
+		  },
+		  keyframes: {
+			meteor: {
+			  "0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
+			  "70%": { opacity: "1" },
+			  "100%": {
+				transform: "rotate(215deg) translateX(-500px)",
+				opacity: "0",
+			  },
+			},
+		  },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -61,3 +75,4 @@ const config: Config = {
   plugins: [require("tailwindcss-animate")],
 };
 export default config;
+

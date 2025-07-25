@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,6 +36,8 @@ const signupSchema = z
     message: "You must be at least 18 years old",
     path: ["dateOfBirth"],
   });
+
+  
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -86,12 +88,27 @@ export default function SignUp() {
     setErrors({});
 
     try {
-      // Here you would typically make an API call to create the user
-      // For now, we'll simulate a successful signup
-      console.log('Signup data:', result.data);
+      // Make API call to create the user
+      console.log('Sending data to backend:', result.data);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('https://8xbznqzs-5001.inc1.devtunnels.ms/api/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result.data),
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Backend error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Signup successful:', data);
       
       // Redirect to login page after successful signup
       router.push('/login?message=Account created successfully! Please log in.');
@@ -124,12 +141,7 @@ export default function SignUp() {
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center">
-          {/* <h1 
-            className="text-3xl font-bold text-[#009688] cursor-pointer"
-            onClick={() => router.push('/')}
-          >
-            Tripzy
-          </h1> */}
+        
           <h2 className="mt-6 text-3xl font-bold text-white">
             Create your account
           </h2>

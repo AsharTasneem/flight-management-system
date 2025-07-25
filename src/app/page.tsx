@@ -2,6 +2,9 @@ import Image from "next/image";
 import HeroSection from "./component/HeroSection";
 import FlightSearchBox from "./component/SearchBox";
 import PopularDestination from "./component/PopularDestination"
+import PopularRoutes from "./component/PopularRoutes";
+import ExtraFeatures from "./component/ExtraFeatures";
+
 export default function Home() {
   return (
     <>
@@ -9,7 +12,10 @@ export default function Home() {
         
         <HeroSection/>
         <FlightSearchBox/>
-        <PopularDestination/>
+        
+        {/* <PopularDestination/> */}
+        <PopularRoutes/>
+        <ExtraFeatures/>
         {/* <Footer/> */}
         
       </div>

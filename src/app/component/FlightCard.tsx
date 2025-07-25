@@ -57,7 +57,6 @@ export default function FlightCard({
 
             Flight Details
           </h3>
-          {/* <d */}
         </div>
 
         <div className="space-y-4">
@@ -67,11 +66,21 @@ export default function FlightCard({
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
               <p className="font-semibold text-gray-800 group-hover:text-[#009688] transition-colors duration-300">Departure</p>
             </div>
+            
+            <div className="flex flex-col gap-2">
             <div className="flex items-center space-x-2 text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
-              <svg className="w-4 h-4 text-[#009688]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[#009688]" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 13V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V19C4 20.1046 4.89543 21 6 21H8M15 3V7M9 3V7M4 11H20M14 19H17M14 17H13C11.8954 17 11 17.8954 11 19C11 20.1046 11.8954 21 13 21H14M17 21H18C19.1046 21 20 20.1046 20 19C20 17.8954 19.1046 17 18 17H17" stroke="currentColor" stroke-width={2} stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              <p className="font-medium">{departureTime}</p>
+                <p className="font-medium">{departureTime.substring(0, 10)}</p>
+              </div>
+
+              <div className="flex items-center space-x-2 text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+                <svg className="w-4 h-4 text-[#009688]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="font-medium">{departureTime.substring(11, 16)}</p>
+              </div>
             </div>
           </div>
 
@@ -81,12 +90,22 @@ export default function FlightCard({
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <p className="font-semibold text-gray-800 group-hover:text-[#009688] transition-colors duration-300">Arrival</p>
             </div>
+            <div className="flex flex-col gap-2">
             <div className="flex items-center space-x-2 text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
-              <svg className="w-4 h-4 text-[#009688]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[#009688]" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 13V7C20 5.89543 19.1046 5 18 5H6C4.89543 5 4 5.89543 4 7V19C4 20.1046 4.89543 21 6 21H8M15 3V7M9 3V7M4 11H20M14 19H17M14 17H13C11.8954 17 11 17.8954 11 19C11 20.1046 11.8954 21 13 21H14M17 21H18C19.1046 21 20 20.1046 20 19C20 17.8954 19.1046 17 18 17H17" stroke="currentColor" stroke-width={2} stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              <p className="font-medium">{arrivalTime}</p>
+                <p className="font-medium">{arrivalTime.substring(0, 10)}</p>
+              </div>
+
+              <div className="flex items-center space-x-2 text-sm text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
+                <svg className="w-4 h-4 text-[#009688]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="font-medium">{arrivalTime.substring(11, 16)}</p>
+              </div>
             </div>
+            
           </div>
 
           {/* Price and Button Section */}
@@ -113,7 +132,7 @@ export default function FlightCard({
                 >
                   Select Flight
                 </Button> */}
-                
+
               <Modal>
                 <ModalTrigger className="bg-gradient-to-r from-[#009688] to-[#00796b] 
                     hover:from-[#00796b] hover:to-[#00695c]
@@ -133,7 +152,7 @@ export default function FlightCard({
                 <ModalBody className="bg-gradient-to-br from-teal-50 to-blue-50">
                   <ModalContent>
                     <h4 className="text-lg md:text-2xl font-bold text-center mb-8 bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500 ">
-                      Book your trip to Amsterdam now! 
+                      Book your trip to Amsterdam now!
                     </h4>
                     <div className="flex justify-center items-center">
                       {images.map((image, idx) => (

@@ -62,7 +62,7 @@ export default function FareSelectionPage() {
       {/* Stepper - Keep unchanged */}
       {/* <div className="w-full mb-6">
       </div> */}
-      <StepperNavbar steps={steps} currentStep={2} />
+      {/* <StepperNavbar steps={steps} currentStep={2} /> */}
 
       {/* Main Content */}
       <div className="flex-1">

@@ -1,23 +1,23 @@
 "use client"
-
-import { useState, useEffect } from "react"
 import parkedPlane from "../../../public/parked.jpg"
-import animatedPlane from "../../../public/animated-plane.jpg"
 import { TypewriterEffectSmooth } from "@/components/ui/typewritter-effect2";
 import { motion } from "motion/react";
 import { ImagesSlider } from "@/components/ui/images-slider";
 import beachView from "../../../public/beach_view.jpg"
 import mountainScenery from "../../../public/mountain_scenery.jpg"
-import { Typewriter } from "react-simple-typewriter";
-// import { FlipWords } from "@/components/ui/flip-word";
+import planeParketOnAirport from "../../../public/plane_on_airport.jpg"
+import beaches from "../../../public/beaches.jpg"
+
+
 
 
 export default function HeroSection() {
     const images = [
         parkedPlane.src,
-        beachView.src,
-        animatedPlane.src,
+        beaches.src,
+        planeParketOnAirport.src,
         mountainScenery.src,
+        beachView.src,
     ];
 
     const words = [
@@ -89,7 +89,7 @@ export default function HeroSection() {
                     delaySpeed={2000}
                     />
                     </h1> */}
-                    <TypewriterEffectSmooth words={words} className="text-center max-w-full"/>
+                    <TypewriterEffectSmooth words={words} className="text-center max-w-full" />
                     {/* <BackgroundBeamsWithCollision> */}
                     {/* </BackgroundBeamsWithCollision> */}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from "next/navigation";
 import { Label } from '@/components/ui/label';
@@ -15,27 +15,43 @@ const searchSchema = z
     from: z.string().min(2, { message: "Origin city is required" }),
     to: z.string().min(2, { message: "Destination city is required" }),
     departure: z.string().min(1, { message: "Departure date is required" }),
-    returnDate: z.string().min(1, { message: "Return date is required" }),
+    returnDate: z.string().optional().or(z.literal("")),
   })
   .refine(
-    (data) => new Date(data.returnDate) >= new Date(data.departure),
+    (data) =>
+      !data.returnDate || new Date(data.returnDate) > new Date(data.departure),
     {
       message: "Return date must be after departure date",
       path: ["returnDate"],
     }
+  )
+  .refine(
+    (data) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // remove time part
+      return new Date(data.departure) > today;
+    },
+    {
+      message: "Departure date must be in the future",
+      path: ["departure"],
+    }
   );
 
+
 export default function FlightSearchBox() {
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [departure, setDeparture] = useState('');
-  const [returnDate, setReturnDate] = useState('');
+  const [formData, setFormData] = useState({
+    from: '',
+    to: '',
+    departure: '',
+    returnDate: '',
+  });
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const router = useRouter();
 
   const handleClick = () => {
-    const formData = { from, to, departure, returnDate };
+    // const formData = { from, to, departure, returnDate };
     const result = searchSchema.safeParse(formData);
 
     if (!result.success) {
@@ -50,23 +66,54 @@ export default function FlightSearchBox() {
 
     // If successful, clear errors and navigate
     setErrors({});
-    // router.push("/search");
-    router.push(`/search?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&departure=${departure}&returnDate=${returnDate}`);
+
+    const query = new URLSearchParams({
+      from: formData.from,
+      to: formData.to,
+      departure: formData.departure,
+      returnDate: formData.returnDate,
+    }).toString();
+    // console.log(query);
+
+    router.push(`/search?${query}`);
 
   };
+
+  function handleChange(fieldName: string, value: string | boolean | number ){
+    
+    
+
+    if(value.toString().length >= 3){
+      console.log(value);
+    }
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    // Clear error when user starts typing
+    if (errors[fieldName]) {
+      setErrors(prev => ({ ...prev, [fieldName]: '' }));
+    }
+  }
+
+  function handleChangeForDates(fieldName: string, value: string | boolean ){
+    console.log(value);
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    // Clear error when user starts typing
+    if (errors[fieldName]) {
+      setErrors(prev => ({ ...prev, [fieldName]: '' }));
+    }
+  }
 
   return (
     <div className="bg-white shadow-md rounded-xl py-8 px-12 mx-12 max-w-full relative overflow-hidden">
       {/* <Meteors number={10} className="absolute"/> */}
       <div className="flex flex-col md:flex-row items-center gap-6 justify-between min-h-[80px]">
-        
+
         {/* From */}
         <div className="flex flex-col w-full md:w-auto min-w-[140px]">
           <Label className="text-sm text-gray-500 mb-1">From</Label>
           <Input
             type="text"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
+            value={formData.from}
+            onChange={(e) => handleChange('from', e.target.value)}
             placeholder="London Stansted"
             className="border-b border-gray-300 focus:outline-none mt-2 focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0"
           />
@@ -78,8 +125,8 @@ export default function FlightSearchBox() {
           <Label className="text-sm text-gray-500 mb-1">To</Label>
           <Input
             type="text"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
+            value={formData.to}
+            onChange={(e) => handleChange('to', e.target.value)}
             placeholder="Amsterdam"
             className="border-b border-gray-300 focus:outline-none mt-2 focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0"
           />
@@ -91,10 +138,11 @@ export default function FlightSearchBox() {
           <Label className="text-sm text-gray-500 mb-1">Departure</Label>
           <Input
             type="date"
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
+            value={formData.departure}
+            onChange={(e) => handleChangeForDates('departure', e.target.value)}
             className="border-b border-gray-300 focus:outline-none mt-2 focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0"
           />
+
           {errors.departure && <p className="text-red-500 text-sm mt-1">{errors.departure}</p>}
         </div>
 
@@ -103,8 +151,8 @@ export default function FlightSearchBox() {
           <Label className="text-sm text-gray-500">Return</Label>
           <Input
             type="date"
-            value={returnDate}
-            onChange={(e) => setReturnDate(e.target.value)}
+            value={formData.returnDate}
+            onChange={(e) => handleChangeForDates('returnDate', e.target.value)}
             className="border-b border-gray-300 focus:outline-none mt-2 focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 "
           />
           {errors.returnDate && <p className="text-red-500 text-sm mt-1">{errors.returnDate}</p>}
@@ -113,8 +161,7 @@ export default function FlightSearchBox() {
         {/* Search Button */}
         <Button
           onClick={handleClick}
-          className="bg-[#009688] hover:bg-teal-700 text-white rounded-xl w-12 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105"
-          style={{ minWidth: '48px', minHeight: '48px' }}
+          className="bg-[#009688] hover:bg-teal-700 text-white rounded-xl w-12 h-12 flex items-center justify-center transition-all duration-200 hover:scale-105 max-w-12 max-h-12"
         >
           <ArrowRight className="w-5 h-5" />
         </Button>

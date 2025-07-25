@@ -3,38 +3,126 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Slider } from "@/components/ui/slider"
 import { useRouter } from 'next/navigation';
-
-
+import { z } from "zod";
 
 export default function FlightFilters() {
     const [stops, setStops] = useState('all');
-    const [time, setTime] = useState('all');
     const [cabinBaggage, setCabinBaggage] = useState(0);
     const [checkedBaggage, setCheckedBaggage] = useState(0);
     const [price, setPrice] = useState(500);
     const [adults, setAdults] = useState(1);
-    const [children, setChildren] = useState(0);
+    const [childrens, setChildrens] = useState(0);
+    const [infants, setInfants] = useState(0);
 
 
     const searchParams = useSearchParams();
+    const [formData, setFormData] = useState({
+        from: searchParams.get("from") || "",
+        to: searchParams.get("to") || "",
+        departure: searchParams.get("departure") || "",
+        returnDate: searchParams.get("returnDate") || "",
+        stops: searchParams.get("stops") || stops,
+        adults: searchParams.get("adults") || adults,
+        childrens: searchParams.get("childrens") || childrens,
+        infants: searchParams.get("infants") || infants,
+        price: searchParams.get("price") || price,
+      });
 
-    const [from, setFrom] = useState(searchParams.get("from") || "");
-    const [to, setTo] = useState(searchParams.get("to") || "");
-    const [departure, setDeparture] = useState(searchParams.get("departure") || "");
-    const [returnDate, setReturnDate] = useState(searchParams.get("returnDate") || "");
+    
+
+    // console.log(formData);
 
     const router = useRouter();
+
+    const searchSchema = z
+      .object({
+        from: z.string().min(2, { message: "Origin city is required" }),
+        to: z.string().min(2, { message: "Destination city is required" }),
+        departure: z.string().min(1, { message: "Departure date is required" }),
+        returnDate: z.string().optional().or(z.literal("")),
+        stops: z.string().optional().or(z.literal(stops)),
+      })
+      .refine(
+        (data) =>
+          !data.returnDate || new Date(data.returnDate) > new Date(data.departure),
+        {
+          message: "Return date must be after departure date",
+          path: ["returnDate"],
+        }
+      )
+      .refine(
+        (data) => {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); 
+          return new Date(data.departure) > today;
+        },
+        {
+          message: "Departure date must be in the future",
+          path: ["departure"],
+        }
+      );
+
+    function handleChange(fieldName: string, value: string | boolean | number ){
+        if(value.toString().length >= 3){
+            console.log(value);
+          }
+        setFormData(prev => ({ ...prev, [fieldName]: value }));
+        // Clear error when user starts typing
+        if (errors[fieldName]) {
+          setErrors(prev => ({ ...prev, [fieldName]: '' }));
+        }
+      }
+
+      function handleChangeForDates(fieldName: string, value: string | boolean ){
+        console.log(value);
+        setFormData(prev => ({ ...prev, [fieldName]: value }));
+        // Clear error when user starts typing
+        if (errors[fieldName]) {
+          setErrors(prev => ({ ...prev, [fieldName]: '' }));
+        }
+      }
+
+    //   function handleChangeForFilters(fieldName: string, value: string | boolean | number ){
+    //     console.log(value);
+    //     setFormData(prev => ({ ...prev, [fieldName]: value }));
+    //     // Clear error when user starts typing
+    //     if (errors[fieldName]) {
+    //       setErrors(prev => ({ ...prev, [fieldName]: '' }));
+    //     }
+    //   }
+
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
     const handleChangeSearch = () => {
+        // const formData = { from, to, departure, returnDate };
+        const result = searchSchema.safeParse(formData);
+
+        if (!result.success) {
+          const fieldErrors: Record<string, string> = {};
+          result.error.issues.forEach((issue) => {
+            const field = issue.path[0] as string;
+            fieldErrors[field] = issue.message;
+          });
+          setErrors(fieldErrors);
+          return;
+        }
+        setErrors({});
         const query = new URLSearchParams({
-            from,
-            to,
-            departure,
-            returnDate,
+            from: formData.from,
+            to: formData.to,
+            departure: formData.departure,
+            returnDate: formData.returnDate,
+            stops: stops,
+            adults: adults.toString(),
+            childrens: childrens.toString(),
+            infants: infants.toString(),
+            price: price.toString(),
         }).toString();
+        console.log(query);
 
         router.push(`?${query}`);
     };
@@ -43,15 +131,6 @@ export default function FlightFilters() {
 
     return (
         <aside className="w-full lg:w-1/4 text-black bg-white font-medium p-5 rounded-xl shadow-md max-h-fit bg-clip-text text-transparent bg-no-repeat bg-gradient-to-r from-purple-500 via-violet-500 to-pink-500"
-            // style={{
-            //     backgroundImage: 'url(/plane_facing_each_other.jpg)',
-            //     backgroundSize: 'cover',
-            //     backgroundPosition: 'center',
-            //     backgroundRepeat: 'no-repeat',
-            //     backgroundAttachment: 'scroll',
-            //     // borderRadius: '10px',
-            //     // margin: '20px 47px 47px 47px',
-            // }}
         >
 
             {/* Search Summary */}
@@ -60,19 +139,23 @@ export default function FlightFilters() {
                 <div className="space-y-2 text-sm">
                     <div>
                         <Label className="block text-blac">From</Label>
-                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={from} onChange={(e) => setFrom(e.target.value)} />
+                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={formData.from} onChange={(e) => handleChange('from', e.target.value)} />
+                        {errors.from && <p className="text-red-500 text-sm mt-1">{errors.from}</p>}
                     </div>
                     <div>
                         <Label className="block text-blak">To</Label>
-                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={to} onChange={(e) => setTo(e.target.value)} />
+                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={formData.to} onChange={(e) => handleChange('to', e.target.value)} />
+                        {errors.to && <p className="text-red-500 text-sm mt-1">{errors.to}</p>}
                     </div>
                     <div>
                         <Label className="block text-blac">Departure</Label>
-                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={departure} onChange={(e) => setDeparture(e.target.value)} type={"date"} />
+                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={formData.departure} onChange={(e) => handleChangeForDates('departure', e.target.value)} type={"date"} />
+                        {errors.departure && <p className="text-red-500 text-sm mt-1">{errors.departure}</p>}
                     </div>
                     <div>
                         <Label className="block text-blac">Return</Label>
-                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} type={"date"} />
+                        <Input className="w-full border rounded px-2 py-1  focus-visible:ring-2 focus-visible:ring-[#00796B] focus-visible:ring-offset-0 my-2 text-gray-700" value={formData.returnDate} onChange={(e) => handleChangeForDates('returnDate', e.target.value)} type={"date"} />
+                        {errors.returnDate && <p className="text-red-500 text-sm mt-1">{errors.returnDate}</p>}
                     </div>
                 </div>
                 <hr className="my-5" />
@@ -83,7 +166,7 @@ export default function FlightFilters() {
                 {/* Stops */}
                 <div>
                     <h3 className="font-semibold mb-2">Stops</h3>
-                    {['All', 'Non-stop', '1 stop', '2 stops'].map((option) => (
+                    {['All', 'Non-stop', 'Multi-stops'].map((option) => (
                         <div key={option} className="mb-1">
                             <label className="inline-flex items-center">
                                 <input
@@ -91,7 +174,7 @@ export default function FlightFilters() {
                                     name="stops"
                                     value={option.toLowerCase()}
                                     checked={stops === option.toLowerCase()}
-                                    onChange={() => setStops(option.toLowerCase())}
+                                    onChange={(e) => setStops(e.target.value)}
                                     className="mr-2 accent-[#009688]"
                                 />
                                 {option}
@@ -156,7 +239,7 @@ export default function FlightFilters() {
                     <hr className="my-5" />
 
                 </div>
-                {/* Adults & Children */}
+                {/* Adults & Children & infants*/}
                 <div>
                     <h3 className="font-semibold mb-2">Passengers</h3>
 
@@ -183,20 +266,43 @@ export default function FlightFilters() {
                     </div>
 
                     {/* Children */}
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-3">
                         <span>Children</span>
                         <div className="flex items-center gap-2">
                             <Button
                                 variant={"secondary"}
-                                onClick={() => setChildren(prev => Math.max(0, prev - 1))}
+                                onClick={() => setChildrens(prev => Math.max(0, prev - 1))}
                                 className="w-6 h-6 rounded-full p-2 bg-[#009688] text-white hover:bg-[#00796B]"
                             >
                                 -
                             </Button>
-                                <span className="w-4 text-center">{children}</span>
+                                <span className="w-4 text-center">{childrens}</span>
                             <Button
                                 variant={"secondary"}
-                                onClick={() => setChildren(prev => prev + 1)}
+                                onClick={() => setChildrens(prev => prev + 1)}
+                                className="w-6 h-6 rounded-full p-2 bg-[#009688] text-white hover:bg-[#00796B]"
+                            >
+                                +
+                            </Button>
+                        </div>
+                    </div>
+
+
+                    {/* Infants */}
+                    <div className="flex justify-between items-center">
+                        <span>Infants</span>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant={"secondary"}
+                                onClick={() => setInfants(prev => Math.max(0, prev - 1))}
+                                className="w-6 h-6 rounded-full p-2 bg-[#009688] text-white hover:bg-[#00796B]"
+                            >
+                                -
+                            </Button>
+                                <span className="w-4 text-center">{infants}</span>
+                            <Button
+                                variant={"secondary"}
+                                onClick={() => setInfants(prev => prev + 1)}
                                 className="w-6 h-6 rounded-full p-2 bg-[#009688] text-white hover:bg-[#00796B]"
                             >
                                 +
@@ -209,28 +315,6 @@ export default function FlightFilters() {
 
                 </div>
 
-
-                {/* Time */}
-                <div>
-                    <h3 className="font-semibold mb-2">Time</h3>
-                    {['All', 'Morning', 'Evening', 'Night'].map((option) => (
-                        <div key={option} className="">
-                            <Label className="inline-flex items-center">
-                                <Input
-                                    type="radio"
-                                    name="time"
-                                    value={option.toLowerCase()}
-                                    checked={time === option.toLowerCase()}
-                                    onChange={() => setTime(option.toLowerCase())}
-                                    className="mr-2 accent-[#009688]"
-                                />
-                                {option}
-                            </Label>
-                        </div>
-                    ))}
-                    <hr className="my-5" />
-
-                </div>
 
                 {/* Price */}
                 <div>
